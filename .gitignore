@@ -1,0 +1,13 @@
+*.pyc
+*.pyo
+*.pyd
+*.pyc.*
+venv/
+env/
+.venv/
+outputs/
+plots/
+results/
+data/raw/
+data/processed/
+*.csv
