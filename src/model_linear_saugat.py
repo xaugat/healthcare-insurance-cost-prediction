@@ -47,3 +47,5 @@ def train_test_split(X, y, test_size=0.2, random_state=42):
 X_train_orig, X_test_orig, y_train_orig, y_test_orig = train_test_split(X, y_original)
 #split log-transformed target variable
 X_train_log, X_test_log, y_train_log, y_test_log = train_test_split(X, y_log)
+
+#feature scaling
