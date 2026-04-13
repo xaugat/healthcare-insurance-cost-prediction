@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 df = pd.read_csv("data/raw/insurance.csv")
-print(df.head())
+#print(df.head())
 
 # converting categorical values like sex, smoker, region into numbers
 df= pd.get_dummies(df, drop_first=True)
@@ -44,7 +44,7 @@ def best_split(X, y):
     n_features = X.shape[1]
 
     for feature in range(n_features):
-        thresholds = np.unique(X[:, feature])
+        thresholds = np.unique(X[:, feature])[:20]
 
         for t in thresholds:
             X_l, X_r, y_l, y_r = split_dataset(X, y, feature, t)
@@ -71,7 +71,7 @@ It divides data into left and right subset, the function calls itself to build s
 Returns: dictionary of current node and its children
 
 """
-def build_tree(X, y, depth=0, max_depth=3):
+def build_tree(X, y, depth=0, max_depth=7):
     if depth == max_depth or np.var(y)==0:
         return np.mean(y)
     
@@ -100,29 +100,60 @@ def predict_tree(tree,x):
         return predict_tree(tree["left"], x)
     else:
         return predict_tree(tree["right"], x)
-    
-tree= build_tree(X, y, max_depth=3)
-pred=predict_tree(tree, X[0])
 
-print("Prediction:", pred)
-print("Actual:", y[0])
 
 
 """
-Output:
-   age     sex  ...     region      charges
-0   19  female  ...  southwest  16884.92400
-1   18    male  ...  southeast   1725.55230
-2   28    male  ...  southeast   4449.46200
-3   33    male  ...  northwest  21984.47061
-4   32    male  ...  northwest   3866.85520
+Random Forest: 
+Now, we terain multiple trees on different random samples of data
+(bootstrappping)
+Final prediction = average prediction from all trees
+This is supposed to improve accuracy and reduce overfitting
+"""
 
-[5 rows x 7 columns]
-Prediction: 18474.021906575344
-Actual: 16884.924
+def bootstrap_sample(X,y):
+    n_samples=X.shape[0]
+    indices = np.random.choice(n_samples,n_samples,replace=True)
+    return X[indices], y[indices]
 
+def random_forest(X, y, n_trees=50, max_depth=7):
+    trees=[]
 
-Interpretation:
-The prediction is close to actual but not exact: 
+    for i in range(n_trees):
+        X_sample, y_sample = bootstrap_sample(X,y)
+        tree= build_tree(X_sample, y_sample, max_depth=max_depth)
+        trees.append(tree)
 
+    return trees
+
+def predict_forest(trees, X):
+    predictions=[]
+
+    for tree in trees: 
+        preds = [predict_tree(tree,x) for x in X]
+        predictions.append(preds)
+
+    return np.mean(predictions, axis=0)
+
+# decision tree & rf model test
+
+if __name__ == "__main__": 
+    tree= build_tree(X, y, max_depth=7)
+    pred=predict_tree(tree, X[1])
+
+    print("Prediction:", pred)
+    print("Actual:", y[1])
+
+    forest = random_forest(X,y,n_trees=50, max_depth=7)
+    preds = predict_forest(forest,X)
+
+    print("Random Forest prediction:", preds[1])
+    print("Actual:", y[1])
+
+"""
+(04/12/2026) Improvements/ changes/ addition: 
+ 
+- Increased tree depth & no, of trees
+- Implemented random forest
+- limited threshold 
 """
