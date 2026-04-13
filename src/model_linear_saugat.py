@@ -49,3 +49,58 @@ X_train_orig, X_test_orig, y_train_orig, y_test_orig = train_test_split(X, y_ori
 X_train_log, X_test_log, y_train_log, y_test_log = train_test_split(X, y_log)
 
 #feature scaling
+class LinearRegressionGD:
+    def __init__(self, learning_rate=0.01, n_iterations=1000):
+        self.learning_rate = learning_rate
+        self.n_iterations = n_iterations
+        self.weights = None
+        self.bias = None
+        self.loss_history = []
+
+    def initialize_parameters(self, n_features):
+        self.weights = np.zeros((n_features, 1))
+        self.bias = 0
+
+    def compute_cost(self, X, y):
+        m = X.shape[0]
+        y_pred = np.dot(X, self.weights) + self.bias
+        cost = (1 / (2 * m)) * np.sum((y_pred - y) ** 2)
+        return cost
+    
+    def fit(self, X, y):
+        m,n = X.shape
+        self.initialize_parameters(n)
+
+        for i in range(self.n_iterations):
+            y_pred = np.dot(X, self.weights) + self.bias
+            dw = (1 / m) * np.dot(X.T, (y_pred - y))
+            db = (1 / m) * np.sum(y_pred - y)
+
+            self.weights = self.weights - self.learning_rate * dw
+            self.bias = self.bias - self.learning_rate * db
+
+            cost = self.compute_cost(X, y)
+            self.loss_history.append(cost)
+
+            if i % 100 == 0:
+                print(f"Iteration {i}, Cost: {cost}")
+
+    def predict(self, X):
+        y_pred = np.dot(X, self.weights) + self.bias
+        return y_pred
+
+
+
+
+
+    
+
+    
+
+    
+    
+    
+
+    
+
+
