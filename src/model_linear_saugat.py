@@ -26,7 +26,6 @@ y_original = df_encoded['charges'].values.reshape(-1, 1)
 y_log = df_encoded['log_charges'].values.reshape(-1, 1)
 
 #train-test split dataset
-
 def train_test_split(X, y, test_size=0.2, random_state=42):
     np.random.seed(random_state)
     indices = np.arange(X.shape[0])
@@ -37,8 +36,8 @@ def train_test_split(X, y, test_size=0.2, random_state=42):
     train_indices = indices[test_count:]
     
     X_train = X[train_indices]
-    y_train = y[train_indices]
     X_test = X[test_indices]
+    y_train = y[train_indices]
     y_test = y[test_indices]
     
     return X_train, X_test, y_train, y_test
@@ -49,8 +48,30 @@ X_train_orig, X_test_orig, y_train_orig, y_test_orig = train_test_split(X, y_ori
 X_train_log, X_test_log, y_train_log, y_test_log = train_test_split(X, y_log)
 
 #feature scaling
+
+def standarize_train_test(X_train, X_test):
+    mean = X_train.mean(axis=0)
+    std = X_train.std(axis=0)
+
+    std[std == 0] = 1
+
+    X_train_scaled = (X_train - mean) / std
+    X_test_scaled = (X_test - mean) / std
+
+    return X_train_scaled, X_test_scaled
+
+X_train_orig, X_test_orig = standarize_train_test(X_train_orig, X_test_orig)
+X_train_log, X_test_log = standarize_train_test(X_train_log, X_test_log)
+
+#scaling original target variable which prevents overflow for original charges model
+
+y_orig_mean = y_train_orig.mean()
+y_orig_std = y_train_orig.std()
+
+y_train_orig_scaled = (y_train_orig - y_orig_mean) / y_orig_std
+
 class LinearRegressionGD:
-    def __init__(self, learning_rate=0.01, n_iterations=1000):
+    def __init__(self, learning_rate=0.001, n_iterations=3000):
         self.learning_rate = learning_rate
         self.n_iterations = n_iterations
         self.weights = None
@@ -101,10 +122,13 @@ def r2_score( y_true, y_pred):
         return r2
     
 #train linear regression model on original target variable charges
-model_orig = LinearRegressionGD(learning_rate=0.01, n_iterations=1000)
-model_orig.fit(X_train_orig, y_train_orig)
+model_orig = LinearRegressionGD(learning_rate=0.001, n_iterations=3000)
+model_orig.fit(X_train_orig, y_train_orig_scaled)
 
-y_pred_orig = model_orig.predict(X_test_orig)
+y_pred_orig_scaled = model_orig.predict(X_test_orig)
+
+#converting predictions back to original scale
+y_pred_orig = y_pred_orig_scaled * y_orig_std + y_orig_mean
 
 mean_squared_error_orig = mean_squared_error(y_test_orig, y_pred_orig)
 r2_score_orig = r2_score(y_test_orig, y_pred_orig)
@@ -112,7 +136,7 @@ r2_score_orig = r2_score(y_test_orig, y_pred_orig)
 print(f"Original Target Variable - MSE: {mean_squared_error_orig}, R2 Score: {r2_score_orig}")
 
 #train linear regression model on log-transformed target variable log_charges
-model_log = LinearRegressionGD(learning_rate=0.01, n_iterations=1000)
+model_log = LinearRegressionGD(learning_rate=0.001, n_iterations=3000)
 model_log.fit(X_train_log, y_train_log)
 
 y_pred_log = model_log.predict(X_test_log)

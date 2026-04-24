@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv("data/raw/insurance.csv")
+df = pd.read_csv("data/insurance.csv")
 #print(df.head())
 
 # converting categorical values like sex, smoker, region into numbers
