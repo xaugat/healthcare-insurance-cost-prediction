@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv("data/insurance.csv")
+df = pd.read_csv("data/raw/insurance.csv")
 #print(df.head())
 
 # converting categorical values like sex, smoker, region into numbers
@@ -52,7 +52,7 @@ def best_split(X, y):
             if len(y_l) == 0 or len(y_r) == 0:
                 continue
 
-            score = (len(y_l)/len(y)) * variance(y_l) + (len(y_r)/len(y)) * variance(y_r)
+            score = (len(y_l)/len(y)) * variance(y_l)+(len(y_r)/len(y))* variance(y_r)
 
             if score < best_score:
                 best_score = score
