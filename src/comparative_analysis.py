@@ -78,6 +78,7 @@ sk_preds = sk_model.predict(X_test).reshape(-1,1)
 # COMPARISOM TABLE
 results = []
 
+
 def evaluate(name, y_true, y_pred):
     results.append({
         "Model":name,
