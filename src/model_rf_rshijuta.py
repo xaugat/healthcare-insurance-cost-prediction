@@ -10,7 +10,7 @@ df= pd.get_dummies(df, drop_first=True)
 
 
 # X : input features
-# y: target
+# y: target variable
 X = df.drop("charges", axis=1)
 y= df["charges"]
 X = X.values
